@@ -1,0 +1,103 @@
+cat <<'EOF' > setup_ish_dev.sh
+#!/usr/bin/env sh
+
+echo "[*] Starting FULL iSH Dev + AI Environment Setup..."
+
+# ----------------------------
+# System Update
+# ----------------------------
+echo "[*] Updating system..."
+apk update && apk upgrade
+
+# ----------------------------
+# Core + Dev Tools
+# ----------------------------
+echo "[*] Installing core development tools..."
+apk add \
+bash bash-completion \
+curl wget git nano vim \
+python3 py3-pip py3-virtualenv \
+nodejs npm \
+openssh rsync \
+htop procps coreutils util-linux findutils grep sed \
+tar unzip zip xz \
+gcc g++ make cmake \
+clang llvm \
+musl-dev linux-headers \
+libffi-dev openssl-dev \
+sqlite sqlite-dev \
+ncurses ncurses-dev \
+readline readline-dev \
+zlib zlib-dev \
+jpeg-dev libpng-dev freetype-dev \
+ffmpeg imagemagick \
+jq yq \
+net-tools iproute2 bind-tools \
+tcpdump nmap \
+tmux screen \
+busybox-extras
+
+# ----------------------------
+# Optional Heavy Dev Stack
+# ----------------------------
+echo "[*] Installing extended dev stack..."
+apk add ruby ruby-dev go rust cargo || true
+
+# ----------------------------
+# Node Global Tools
+# ----------------------------
+echo "[*] Installing global Node tools..."
+npm install -g yarn typescript || true
+
+# ----------------------------
+# Python AI Stack
+# ----------------------------
+echo "[*] Installing Python AI packages..."
+python3 -m pip install --upgrade pip
+
+pip install \
+numpy pandas scipy \
+requests flask fastapi \
+uvicorn rich tqdm \
+scikit-learn \
+matplotlib seaborn \
+pillow \
+aiohttp \
+watchdog \
+transformers || true
+
+# Attempt torch (may fail in iSH)
+pip install torch || true
+
+# ----------------------------
+# Verification
+# ----------------------------
+echo
+echo "[*] Running verification..."
+echo "--------------------------------"
+
+python3 -c "import sys; print('[OK] Python:', sys.version)" || echo "[!!] Python issue"
+node -v && echo "[OK] Node installed" || echo "[!!] Node missing"
+git --version && echo "[OK] Git installed" || echo "[!!] Git missing"
+
+echo
+echo "[*] Setup Complete."
+echo "--------------------------------"
+echo "[*] Your iSH environment is now:"
+echo "    - Full dev environment"
+echo "    - Python + AI ready"
+echo "    - Networking toolkit"
+echo "    - Ready for Sentinel-style systems"
+
+echo
+echo "[*] Note:"
+echo "    - Torch may not work (expected in iSH)"
+echo "    - No native USB access in iSH (by design)"
+echo
+
+EOF
+
+chmod +x setup_ish_dev.sh
+
+echo "[*] Script created: setup_ish_dev.sh"
+echo "[*] Run it with: ./setup_ish_dev.sh"
