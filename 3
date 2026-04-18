@@ -1,0 +1,179 @@
+cat <<'EOF' > setup_ish_layer3_overkill.sh
+#!/usr/bin/env sh
+set -u
+
+echo "[*] LAYER 3: Overkill security + dev environment for iSH/Alpine"
+
+# --------------------------------------------------
+# Repos
+# --------------------------------------------------
+echo "[*] Enabling community repo if available..."
+setup-apkrepos -c >/dev/null 2>&1 || true
+
+echo "[*] Updating package indexes..."
+apk update || exit 1
+apk upgrade || true
+
+# --------------------------------------------------
+# Core dev + build chain
+# --------------------------------------------------
+echo "[*] Installing core dev stack..."
+apk add \
+  bash bash-completion \
+  curl wget git nano vim neovim \
+  python3 py3-pip py3-virtualenv \
+  nodejs npm \
+  openssh rsync \
+  tmux screen \
+  htop procps coreutils util-linux findutils grep sed gawk \
+  tar unzip zip xz file tree less \
+  gcc g++ make cmake clang llvm \
+  musl-dev linux-headers libc-dev \
+  libffi-dev openssl-dev \
+  sqlite sqlite-dev \
+  ncurses ncurses-dev \
+  readline readline-dev \
+  zlib zlib-dev \
+  jpeg-dev libpng-dev freetype-dev \
+  jq yq \
+  ruby ruby-dev \
+  go \
+  rust cargo \
+  busybox-extras || true
+
+# --------------------------------------------------
+# Network + diagnostics
+# --------------------------------------------------
+echo "[*] Installing network and troubleshooting tools..."
+apk add \
+  net-tools iproute2 bind-tools \
+  nmap tcpdump \
+  iputils \
+  socat \
+  netcat-openbsd \
+  traceroute \
+  mtr \
+  whois \
+  openssl \
+  rsync || true
+
+# --------------------------------------------------
+# Security-oriented baseline
+# --------------------------------------------------
+echo "[*] Installing security-oriented baseline tools..."
+apk add \
+  hydra \
+  john \
+  sqlmap \
+  nikto \
+  masscan \
+  gobuster \
+  ffuf \
+  dirb \
+  hashcat \
+  binwalk \
+  radare2 \
+  gnupg \
+  gnupg-utils \
+  strace \
+  ltrace \
+  tcpflow \
+  tshark \
+  yara \
+  yara-dev || true
+
+# --------------------------------------------------
+# Useful media / parsing / conversion tools
+# --------------------------------------------------
+echo "[*] Installing helper utilities..."
+apk add \
+  ffmpeg imagemagick \
+  exiftool \
+  ripgrep \
+  fd \
+  bat \
+  dos2unix || true
+
+# --------------------------------------------------
+# Node global tools
+# --------------------------------------------------
+echo "[*] Installing Node global tooling..."
+npm install -g \
+  yarn \
+  typescript \
+  eslint \
+  prettier || true
+
+# --------------------------------------------------
+# Python upgrade
+# --------------------------------------------------
+echo "[*] Upgrading pip..."
+python3 -m pip install --upgrade pip setuptools wheel || true
+
+# --------------------------------------------------
+# Python AI / scripting / security helpers
+# --------------------------------------------------
+echo "[*] Installing Python packages..."
+python3 -m pip install \
+  numpy pandas scipy \
+  requests httpx aiohttp \
+  flask fastapi uvicorn \
+  rich tqdm watchdog \
+  matplotlib pillow \
+  scikit-learn \
+  pyyaml toml \
+  beautifulsoup4 lxml \
+  python-nmap \
+  scapy \
+  yara-python \
+  pwntools \
+  paramiko \
+  pytest black || true
+
+# Optional heavier AI libs
+echo "[*] Installing optional AI packages..."
+python3 -m pip install \
+  transformers \
+  sentencepiece \
+  tokenizers || true
+
+# Torch often fails or is impractical in iSH
+python3 -m pip install torch || true
+
+# --------------------------------------------------
+# Quick verification
+# --------------------------------------------------
+echo
+echo "[*] Verification"
+echo "--------------------------------"
+
+check_cmd() {
+  if command -v "$1" >/dev/null 2>&1; then
+    echo "[OK] $1 -> $(command -v "$1")"
+  else
+    echo "[--] $1 not present"
+  fi
+}
+
+for c in \
+  python3 pip git node npm nmap tcpdump hydra john sqlmap nikto \
+  masscan gobuster ffuf hashcat radare2 tshark yara scapy; do
+  check_cmd "$c"
+done
+
+echo
+python3 -V || true
+node -v || true
+git --version || true
+
+echo
+echo "[*] Layer 3 complete."
+echo "[*] Notes:"
+echo "    - Some packages may be unavailable on your exact Alpine/iSH build."
+echo "    - This script is designed to keep going instead of stopping."
+echo "    - iSH is best used as a sandboxed dev/security workspace."
+EOF
+
+chmod +x setup_ish_layer3_overkill.sh
+echo "[*] Created: setup_ish_layer3_overkill.sh"
+echo "[*] Run with: ./setup_ish_layer3_overkill.sh"
